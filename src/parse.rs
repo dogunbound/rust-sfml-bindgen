@@ -1,3 +1,5 @@
+pub mod util;
+
 use self::raw::parse_sig_raw;
 
 mod raw;
@@ -27,7 +29,9 @@ pub(crate) struct Arg<'a> {
 }
 
 pub(crate) fn parse(input: &str) -> Signature {
+    eprintln!("=== Parsing {} ===", input);
     let raw = parse_sig_raw(input);
+    dbg!(&raw);
     let (fname, fty) = raw_ptr_conv(raw.name, raw.ret_type);
     let mut args = Vec::new();
     for arg in raw.args {
@@ -80,6 +84,7 @@ fn raw_ptr_conv<'a>(mut name: &'a str, mut type_: &'a str) -> (&'a str, Type<'a>
 
 #[test]
 fn test_parse() {
+    use pretty_assertions::assert_eq;
     use Ptr::*;
     assert_eq!(
         parse(
@@ -158,6 +163,25 @@ fn test_parse() {
                     },
                 },
             ],
+        }
+    );
+    assert_eq!(
+        parse(
+            r#"extern "C" const sfView *sfRenderWindow_getView(const sfRenderWindow *renderWindow)"#
+        ),
+        Signature {
+            name: "sfRenderWindow_getView",
+            args: vec![Arg {
+                name: "renderWindow",
+                type_: Type {
+                    ident: "sfRenderWindow",
+                    pointer: Const,
+                }
+            }],
+            ret_type: Type {
+                ident: "sfView",
+                pointer: Const
+            }
         }
     );
 }

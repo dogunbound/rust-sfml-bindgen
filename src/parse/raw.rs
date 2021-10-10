@@ -1,4 +1,4 @@
-use std::str::pattern::Pattern;
+use crate::parse::util::{find_abs, rfind_abs};
 
 #[derive(Debug, PartialEq)]
 pub(super) struct RawSig<'a> {
@@ -33,20 +33,18 @@ fn parse_arg_raw(input: &str) -> RawArg {
     }
 }
 
-fn find_abs<'a, P: Pattern<'a>>(input: &'a str, start: usize, pat: P) -> usize {
-    input[start..].find(pat).unwrap() + start
-}
-
 pub(super) fn parse_sig_raw(mut input: &str) -> RawSig {
     input = input.trim_start_matches(r#"extern "C""#);
     input = input.trim_start();
-    let first_space = input.find(|c: char| c.is_whitespace()).unwrap();
-    let type_ = &input[..first_space];
-    dbg!(type_);
-    let args_open = find_abs(input, first_space + 1, '(');
-    let fname = &input[first_space + 1..args_open];
+    dbg!(input);
+    let args_open = find_abs(input, 0, '(').unwrap();
+    dbg!(&input[0..args_open]);
+    let first_space_rev = rfind_abs(input, args_open, |c: char| c.is_whitespace()).unwrap();
+    let fname = &input[first_space_rev..args_open];
     dbg!(fname);
-    let args_close = find_abs(input, args_open + 1, ')');
+    let type_ = &input[..first_space_rev - 1];
+    dbg!(type_);
+    let args_close = find_abs(input, args_open + 1, ')').unwrap();
     let args_part = &input[args_open + 1..args_close];
     dbg!(args_part);
     let args = parse_args_raw(args_part);
@@ -89,6 +87,7 @@ fn test_parse_arg_raw() {
 
 #[test]
 fn test_parse_sig_raw() {
+    use pretty_assertions::assert_eq;
     assert_eq!(
         parse_sig_raw(
             r#"extern "C" sfVector2i sfTouch_getPositionRenderWindow(unsigned int finger, const sfRenderWindow *relativeTo)"#
@@ -126,5 +125,18 @@ fn test_parse_sig_raw() {
                 }
             ]
         }
-    )
+    );
+    assert_eq!(
+        parse_sig_raw(
+            r#"extern "C" const sfView *sfRenderWindow_getView(const sfRenderWindow *renderWindow)"#
+        ),
+        RawSig {
+            ret_type: "const sfView",
+            name: "*sfRenderWindow_getView",
+            args: vec![RawArg {
+                name: "*renderWindow",
+                type_: "const sfRenderWindow"
+            }]
+        }
+    );
 }
