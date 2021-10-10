@@ -47,6 +47,7 @@ fn conv_type_ident(ident_: &str) -> String {
         "float" => "f32",
         "double" => "f64",
         "void" => "c_void",
+        "char" => "c_char",
         _ => ident_,
     })
 }
