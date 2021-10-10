@@ -46,6 +46,7 @@ fn conv_type_ident(ident_: &str) -> String {
         "unsigned int" => "c_uint",
         "float" => "f32",
         "double" => "f64",
+        "void" => "c_void",
         _ => ident_,
     })
 }
