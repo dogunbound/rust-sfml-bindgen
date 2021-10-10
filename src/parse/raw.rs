@@ -25,7 +25,7 @@ fn parse_arg_raw(input: &str) -> RawArg {
     let name_end = find_arg_delim_right(input);
     let name_start = input[..name_end]
         .rfind(|c: char| c.is_whitespace())
-        .unwrap();
+        .unwrap_or(0);
     let type_start = find_arg_delim_left_rev(&input[..name_start]);
     RawArg {
         type_: input[type_start..name_start].trim(),
@@ -57,7 +57,17 @@ pub(super) fn parse_sig_raw(mut input: &str) -> RawSig {
 
 fn parse_args_raw(input: &str) -> Vec<RawArg> {
     dbg!(input);
-    input.split(',').map(parse_arg_raw).collect()
+    input
+        .split(',')
+        .filter_map(|chunk| {
+            let arg = parse_arg_raw(chunk);
+            if arg.name.is_empty() || arg.type_.is_empty() {
+                None
+            } else {
+                Some(arg)
+            }
+        })
+        .collect()
 }
 
 #[test]
@@ -137,6 +147,24 @@ fn test_parse_sig_raw() {
                 name: "*renderWindow",
                 type_: "const sfRenderWindow"
             }]
+        }
+    );
+    // Single void arg
+    assert_eq!(
+        parse_sig_raw(r#"extern "C" sf::Context *sfContext_create(void)"#),
+        RawSig {
+            ret_type: "sf::Context",
+            name: "*sfContext_create",
+            args: vec![],
+        }
+    );
+    // Empty arg list
+    assert_eq!(
+        parse_sig_raw(r#"extern "C" sf::Context *sfContext_create()"#),
+        RawSig {
+            ret_type: "sf::Context",
+            name: "*sfContext_create",
+            args: vec![],
         }
     );
 }
