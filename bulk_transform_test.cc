@@ -17,3 +17,10 @@ extern "C" void sfRenderWindow_drawPrimitives(sfRenderWindow *renderWindow,
                                               sfPrimitiveType type, const sf::RenderStates *states) {
     reinterpret_cast<sf::RenderWindow *>(renderWindow)->draw(reinterpret_cast<const sf::Vertex *>(vertices), vertexCount, static_cast<sf::PrimitiveType>(type), *states);
 }
+extern "C" void sfWindow_setFramerateLimit(sfWindow *window, unsigned int limit) {
+    window->This.setFramerateLimit(limit);
+}
+
+extern "C" void sfWindow_setJoystickThreshold(sfWindow *window, float threshold) {
+    window->This.setJoystickThreshold(threshold);
+}

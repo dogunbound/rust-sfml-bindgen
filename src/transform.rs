@@ -36,7 +36,18 @@ fn transform_type(type_: parse::Type) -> String {
         Ptr::Const => "*const ",
         Ptr::Mut => "*mut ",
     };
-    format!("{}{}", p, ident(type_.ident))
+    format!("{}{}", p, conv_type_ident(type_.ident))
+}
+
+fn conv_type_ident(ident_: &str) -> String {
+    ident(match ident_ {
+        "size_t" => "usize",
+        "int" => "c_int",
+        "unsigned int" => "c_uint",
+        "float" => "f32",
+        "double" => "f64",
+        _ => ident_,
+    })
 }
 
 fn ident(input: &str) -> String {
@@ -65,7 +76,7 @@ fn test_transform() {
         "pub fn sfRenderWindow_drawPrimitives(\
             renderWindow: *mut sfRenderWindow, \
             vertices: *const sfVertex, \
-            vertexCount: size_t, \
+            vertexCount: usize, \
             type_: sfPrimitiveType, \
             states: *const sfRenderStates)"
     );
