@@ -1,16 +1,16 @@
 use std::str::pattern::Pattern;
 
 #[derive(Debug, PartialEq)]
-pub(crate) struct RawSig<'a> {
-    pub(crate) ret_type: &'a str,
-    pub(crate) name: &'a str,
-    pub(crate) args: Vec<RawArg<'a>>,
+pub(super) struct RawSig<'a> {
+    pub(super) ret_type: &'a str,
+    pub(super) name: &'a str,
+    pub(super) args: Vec<RawArg<'a>>,
 }
 
 #[derive(Debug, PartialEq)]
-pub(crate) struct RawArg<'a> {
-    pub(crate) type_: &'a str,
-    pub(crate) name: &'a str,
+pub(super) struct RawArg<'a> {
+    pub(super) type_: &'a str,
+    pub(super) name: &'a str,
 }
 
 fn find_arg_delim_right(input: &str) -> usize {
@@ -37,7 +37,7 @@ fn find_abs<'a, P: Pattern<'a>>(input: &'a str, start: usize, pat: P) -> usize {
     input[start..].find(pat).unwrap() + start
 }
 
-pub(crate) fn parse_sig_raw(mut input: &str) -> RawSig {
+pub(super) fn parse_sig_raw(mut input: &str) -> RawSig {
     input = input.trim_start_matches(r#"extern "C""#);
     input = input.trim_start();
     let first_space = input.find(|c: char| c.is_whitespace()).unwrap();
