@@ -1,4 +1,5 @@
 use crate::parse::{self, Ptr};
+use std::fmt::Write;
 
 pub(crate) fn transform(input: &str) -> String {
     let sig = parse::parse(input);
@@ -18,7 +19,7 @@ fn transform_ret(type_: parse::Type) -> String {
 fn transform_args(args: Vec<parse::Arg>) -> String {
     let mut out = String::new();
     for arg in args {
-        out += &format!("{}, ", transform_arg(arg));
+        write!(&mut out, "{}, ", transform_arg(arg)).unwrap();
     }
     // Remove last `, `
     out.pop();
