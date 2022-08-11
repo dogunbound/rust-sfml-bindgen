@@ -36,17 +36,17 @@ fn parse_arg_raw(input: &str) -> RawArg {
 pub(super) fn parse_sig_raw(mut input: &str) -> RawSig {
     input = input.trim_start_matches(r#"extern "C""#);
     input = input.trim_start();
-    dbg!(input);
+    //dbg!(input);
     let args_open = find_abs(input, 0, '(').unwrap();
-    dbg!(&input[0..args_open]);
+    //dbg!(&input[0..args_open]);
     let first_space_rev = rfind_abs(input, args_open, |c: char| c.is_whitespace()).unwrap();
     let fname = &input[first_space_rev..args_open];
-    dbg!(fname);
+    //dbg!(fname);
     let type_ = &input[..first_space_rev - 1];
-    dbg!(type_);
+    //dbg!(type_);
     let args_close = find_abs(input, args_open + 1, ')').unwrap();
     let args_part = &input[args_open + 1..args_close];
-    dbg!(args_part);
+    //dbg!(args_part);
     let args = parse_args_raw(args_part);
     RawSig {
         name: fname,
@@ -56,7 +56,7 @@ pub(super) fn parse_sig_raw(mut input: &str) -> RawSig {
 }
 
 fn parse_args_raw(input: &str) -> Vec<RawArg> {
-    dbg!(input);
+    //    dbg!(input);
     input
         .split(',')
         .filter_map(|chunk| {

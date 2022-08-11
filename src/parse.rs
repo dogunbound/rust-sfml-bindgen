@@ -29,9 +29,9 @@ pub(crate) struct Arg<'a> {
 }
 
 pub(crate) fn parse(input: &str) -> Signature {
-    eprintln!("=== Parsing {} ===", input);
+    //    eprintln!("=== Parsing {} ===", input);
     let raw = parse_sig_raw(input);
-    dbg!(&raw);
+    //    dbg!(&raw);
     let (fname, fty) = raw_ptr_conv(raw.name, raw.ret_type);
     let mut args = Vec::new();
     for arg in raw.args {
@@ -49,7 +49,7 @@ pub(crate) fn parse(input: &str) -> Signature {
 }
 
 fn raw_ptr_conv<'a>(mut name: &'a str, mut type_: &'a str) -> (&'a str, Type<'a>) {
-    dbg!(name, type_);
+    //    dbg!(name, type_);
     let mut const_ = false;
     let mut ptr = false;
     if name.contains("const") {
