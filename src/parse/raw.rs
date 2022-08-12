@@ -167,4 +167,17 @@ fn test_parse_sig_raw() {
             args: vec![],
         }
     );
+    assert_eq!(
+        parse_sig_raw(
+            r#"extern "C" sf::Transform const *sfSprite_getTransform(const sf::Sprite *sprite)"#
+        ),
+        RawSig {
+            ret_type: "sf::Transform const",
+            name: "*sfSprite_getTransform",
+            args: vec![RawArg {
+                name: "*sprite",
+                type_: "const sf::Sprite",
+            }]
+        }
+    );
 }

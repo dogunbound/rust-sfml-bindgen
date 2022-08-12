@@ -31,7 +31,7 @@ pub(crate) struct Arg<'a> {
 pub(crate) fn parse(input: &str) -> Signature {
     //    eprintln!("=== Parsing {} ===", input);
     let raw = parse_sig_raw(input);
-    //    dbg!(&raw);
+    // dbg!(&raw);
     let (fname, fty) = raw_ptr_conv(raw.name, raw.ret_type);
     let mut args = Vec::new();
     for arg in raw.args {
@@ -63,6 +63,7 @@ fn raw_ptr_conv<'a>(mut name: &'a str, mut type_: &'a str) -> (&'a str, Type<'a>
     if type_.contains("const") {
         const_ = true;
         type_ = type_.trim_start_matches("const");
+        type_ = type_.trim_end_matches("const");
     }
     if type_.contains('*') {
         ptr = true;
@@ -184,4 +185,21 @@ fn test_parse() {
             }
         }
     );
+    assert_eq!(
+        parse(r#"extern "C" sf::Transform const *sfSprite_getTransform(const sf::Sprite *sprite)"#),
+        Signature {
+            name: "sfSprite_getTransform",
+            args: vec![Arg {
+                name: "sprite",
+                type_: Type {
+                    ident: "sf::Sprite",
+                    pointer: Const
+                }
+            }],
+            ret_type: Type {
+                ident: "sf::Transform",
+                pointer: Const
+            }
+        }
+    )
 }
