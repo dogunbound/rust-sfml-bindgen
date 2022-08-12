@@ -35,26 +35,29 @@ fn test_bulk_transform() {
 }
 
 fn main() {
-    let csfml_src_path = args().nth(1).expect("Need path to CSFML/src");
-    transform_all_files(csfml_src_path);
+    let rust_sfml_root = args().nth(1).expect("Need rust-sfml root path");
+    transform_all_files(rust_sfml_root);
 }
 
-fn transform_all_files(csfml_src_path: String) {
+fn transform_all_files(rust_sfml_root: String) {
     for module in ["System", "Window", "Graphics", "Audio"] {
         println!("== {} ==", module);
-        let mut entries: Vec<String> = std::fs::read_dir(format!("{}/{}", csfml_src_path, module))
-            .unwrap()
-            .filter_map(|result| {
-                let name = result.unwrap().file_name().to_str().unwrap().to_owned();
-                name.ends_with(".cpp").then_some(name)
-            })
-            .collect();
+        let mut entries: Vec<String> =
+            std::fs::read_dir(format!("{}/CSFML/src/{}", rust_sfml_root, module))
+                .unwrap()
+                .filter_map(|result| {
+                    let name = result.unwrap().file_name().to_str().unwrap().to_owned();
+                    name.ends_with(".cpp").then_some(name)
+                })
+                .collect();
         entries.sort();
         for filename in entries {
             println!("// {}", filename);
-            let input =
-                std::fs::read_to_string(format!("{}/{}/{}", csfml_src_path, module, filename))
-                    .unwrap();
+            let input = std::fs::read_to_string(format!(
+                "{}/CSFML/src/{}/{}",
+                rust_sfml_root, module, filename
+            ))
+            .unwrap();
             println!("{}", bulk_transform(&input));
         }
     }
