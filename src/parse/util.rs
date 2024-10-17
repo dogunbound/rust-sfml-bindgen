@@ -1,12 +1,12 @@
 use std::str::pattern::{Pattern, ReverseSearcher};
 
-pub(crate) fn find_abs<'a, P: Pattern<'a>>(input: &'a str, start: usize, pat: P) -> Option<usize> {
+pub(crate) fn find_abs<P: Pattern>(input: &str, start: usize, pat: P) -> Option<usize> {
     input[start..].find(pat).map(|idx| idx + start)
 }
 
-pub(crate) fn rfind_abs<'a, P: Pattern<'a>>(input: &'a str, start: usize, pat: P) -> Option<usize>
+pub(crate) fn rfind_abs<P: Pattern>(input: &str, start: usize, pat: P) -> Option<usize>
 where
-    P::Searcher: ReverseSearcher<'a>,
+    for<'a> P::Searcher<'a>: ReverseSearcher<'a>,
 {
     input[..start].rfind(pat).map(|offset| offset + 1)
 }
