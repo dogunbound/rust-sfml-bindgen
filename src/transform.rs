@@ -71,6 +71,8 @@ fn conv_type_ident(ident_: &str) -> String {
         "std::vector<std::string>" => "sfStdStringVector",
         "std::vector<sf::VideoMode>" => "sfVideoModeVector",
         "std::vector<sf::SoundChannel>" => "sfSoundChannelVector",
+        "std::vector<sf::Text::ShapedGlyph>" => "sfShapedGlyphVector",
+        "sf::Text::ShapedGlyph" => "sfShapedGlyph",
         _ => ident_,
     })
 }
@@ -110,5 +112,11 @@ fn test_transform() {
             r#"extern "C" sf::WindowHandle sfRenderWindow_getSystemHandle(const sfRenderWindow *renderWindow) {"#
         ),
         "pub fn sfRenderWindow_getSystemHandle(renderWindow: *const sfRenderWindow) -> sfWindowHandle"
+    );
+    assert_eq!(
+        transform(
+            r#"extern "C" const sf::Text::ShapedGlyph *sfShapedGlyphVector_getData(const std::vector<sf::Text::ShapedGlyph> *vec) {"#
+        ),
+        "pub fn sfShapedGlyphVector_getData(vec: *const sfShapedGlyphVector) -> *const sfShapedGlyph"
     )
 }
