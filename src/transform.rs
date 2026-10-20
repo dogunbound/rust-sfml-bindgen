@@ -33,11 +33,19 @@ fn transform_arg(arg: parse::Arg) -> String {
 
 fn transform_type(type_: parse::Type) -> String {
     let p = match type_.pointer {
-        Ptr::No => "",
-        Ptr::Const => "*const ",
-        Ptr::Mut => "*mut ",
+        Ptr::No => String::new(),
+        Ptr::Const => "*const ".to_owned(),
+        Ptr::Mut => "*mut ".to_owned(),
+        Ptr::Double {
+            outer_const,
+            inner_const,
+        } => format!("{}{}", pointer_prefix(outer_const), pointer_prefix(inner_const)),
     };
     format!("{}{}", p, conv_type_ident(type_.ident))
+}
+
+fn pointer_prefix(const_: bool) -> &'static str {
+    if const_ { "*const " } else { "*mut " }
 }
 
 fn conv_type_ident(ident_: &str) -> String {

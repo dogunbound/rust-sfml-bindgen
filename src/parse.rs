@@ -20,6 +20,9 @@ pub(crate) enum Ptr {
     No,
     Const,
     Mut,
+    /// Two levels of indirection, such as `const char *const *`.
+    /// `outer_const` and `inner_const` give the constness of the outer and inner pointer.
+    Double { outer_const: bool, inner_const: bool },
 }
 
 #[derive(Debug, PartialEq)]
@@ -50,6 +53,28 @@ pub(crate) fn parse(input: &str) -> Signature {
 
 fn raw_ptr_conv<'a>(mut name: &'a str, mut type_: &'a str) -> (&'a str, Type<'a>) {
     //    dbg!(name, type_);
+    let name_stars = name.matches('*').count();
+    let type_stars = type_.matches('*').count();
+    if name_stars + type_stars == 2 && type_stars >= 1 {
+        let parts: Vec<&'a str> = type_.split('*').collect();
+        return (
+            name.trim_matches('*').trim(),
+            Type {
+                ident: parts[0]
+                    .trim_start_matches("const")
+                    .trim_end_matches("const")
+                    .trim(),
+                pointer: Ptr::Double {
+                    outer_const: parts[1].contains("const"),
+                    inner_const: parts[0].contains("const"),
+                },
+            },
+        );
+    }
+    assert!(
+        name_stars + type_stars < 2,
+        "unsupported pointer depth in `{name} {type_}`"
+    );
     let mut const_ = false;
     let mut ptr = false;
     if name.contains("const") {
@@ -200,6 +225,34 @@ fn test_parse() {
                 ident: "sf::Transform",
                 pointer: Const
             }
+        }
+    )
+}
+
+#[test]
+fn test_parse_double_pointer() {
+    use pretty_assertions::assert_eq;
+    use Ptr::*;
+    assert_eq!(
+        parse(
+            r#"extern "C" const char *const *sfVulkan_getGraphicsRequiredInstanceExtensions(size_t *count)"#
+        ),
+        Signature {
+            name: "sfVulkan_getGraphicsRequiredInstanceExtensions",
+            ret_type: Type {
+                ident: "char",
+                pointer: Double {
+                    outer_const: true,
+                    inner_const: true,
+                },
+            },
+            args: vec![Arg {
+                name: "count",
+                type_: Type {
+                    ident: "size_t",
+                    pointer: Mut,
+                },
+            }],
         }
     )
 }
